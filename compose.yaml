@@ -1,0 +1,31 @@
+name: postgres
+
+services:
+  postgresdb:
+    container_name: postgresdb
+    image: postgres:${PG_VERSION:-18.1}
+    restart: always
+    volumes:
+      - postgresdb_vol:/var/lib/postgresql${PG_DATA_SUFFIX:-}:Z
+    networks:
+      - postgresdb_net
+    ports:
+      - "${PG_HOST_DB_PORT:-5432}:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${DB_NAME:-postgres}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:?DB_PASSWORD is required}
+
+networks:
+  postgresdb_net:
+    driver: bridge
+
+volumes:
+  postgresdb_vol:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DB_DATA_PATH:?DB_DATA_PATH is required}
